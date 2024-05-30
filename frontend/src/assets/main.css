@@ -1,0 +1,11 @@
+@import './base.css';
+@import 'element-plus/dist/index.css';
+
+html,
+body, #app {
+    height: calc(100% - 7px);
+}
+
+#app{
+    background-color: rgb(245, 245, 245);
+}
