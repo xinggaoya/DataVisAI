@@ -1,8 +1,8 @@
 package main
 
 import (
+	"DataVisAI/internal"
 	"embed"
-	"wails_demo/internal"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -18,7 +18,7 @@ func main() {
 
 	// Create application with options
 	err := wails.Run(&options.App{
-		Title:  "wails_demo",
+		Title:  "DataVisAI",
 		Width:  1200,
 		Height: 800,
 		AssetServer: &assetserver.Options{

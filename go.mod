@@ -1,4 +1,4 @@
-module wails_demo
+module DataVisAI
 
 go 1.21
 

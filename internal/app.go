@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/xinggaoya/qwen-sdk/qwen"
+	"log"
 )
 
 // App struct
@@ -29,8 +30,8 @@ func (a *App) Greet(name string) string {
 }
 
 // TestDB 测试连接
-func (a *App) TestDB(host, port, username, password, database string) bool {
-	db := NewDBModel(host, username, password, port, database)
+func (a *App) TestDB(host, port, username, password string) bool {
+	db := NewDBModel(host, username, password, port, "")
 	defer db.Close()
 	if err := db.Ping(); err != nil {
 		fmt.Println(err)
@@ -45,6 +46,7 @@ func (a *App) GetAllDatabases(host, port, username, password string) ([]string, 
 	db := NewDBModel(host, username, password, port, "")
 	rows, err := db.DB.Query("SHOW DATABASES")
 	if err != nil {
+		log.Printf("查询数据库列表失败: %v", err)
 		return nil, fmt.Errorf("查询数据库列表失败: %v", err)
 	}
 	defer rows.Close()
@@ -129,12 +131,14 @@ func (a *App) GetTableStructure(host, port, username, password, database, table 
 }
 
 // GetAIAnswer 获取回答
-func (a *App) GetAIAnswer(info, question string) string {
-	apiKey := "sk-3437acc67dbf452f9b2f0f2a49640518"
+func (a *App) GetAIAnswer(apiKey, info, question string) string {
 	client := qwen.NewWithDefaultChat(apiKey)
+	if info == "" {
+		return fmt.Sprintf("请输入表结构信息")
+	}
 	// 定义一条消息对话的历史记录
 	messages := []qwen.Messages{
-		{Role: "system", Content: "你现在是SQL大师，下面将会给你发送MySQL数据表结构，你结合进行回答问题。言简意赅，只回答问题，不要过多解释！"},
+		{Role: "system", Content: "你现在是SQL大师，下面将会给你发送MySQL数据表结构，你根据结构提供的字段结合进行回答问题,表名称尽量使用别名，字段尽量不使用*号，应该全部输出。言简意赅，只需回复SQL语句即可，不要解释。"},
 		{Role: qwen.ChatUser, Content: info},
 		{Role: qwen.ChatUser, Content: question},
 	}
@@ -143,7 +147,7 @@ func (a *App) GetAIAnswer(info, question string) string {
 	resp, err := client.GetAIReply(messages)
 	if err != nil {
 		fmt.Printf("获取AI回复失败：%v\n", err)
-		return "Answer: " + question
+		return fmt.Sprintf("获取AI回复失败")
 	}
 
 	return resp.Output.Text
