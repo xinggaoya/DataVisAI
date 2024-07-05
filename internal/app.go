@@ -104,30 +104,20 @@ type TableColumn struct {
 }
 
 // GetTableStructure 获取表结构
-func (a *App) GetTableStructure(host, port, username, password, database, table string) ([]TableColumn, error) {
+func (a *App) GetTableStructure(host, port, username, password, database string, table []string) ([]string, error) {
 	db := NewDBModel(host, username, password, port, database)
 	defer db.Close()
 
-	sprintf := fmt.Sprintf("DESC %s", table)
-	rows, err := db.DB.Query(sprintf)
-	if err != nil {
-		return nil, fmt.Errorf("查询表结构失败: %v", err)
-	}
-	defer rows.Close()
-	var columns []TableColumn
-	for rows.Next() {
-		var column TableColumn
-		if err = rows.Scan(&column.Field, &column.Type, &column.Null, &column.Key, &column.Default, &column.Extra); err != nil {
-			return nil, fmt.Errorf("读取列名称失败: %v", err)
-		}
-		columns = append(columns, column)
+	var list []string
+	for _, tableName := range table {
+		sprintf := fmt.Sprintf("SHOW CREATE TABLE %s", tableName)
+		rows := db.DB.QueryRow(sprintf)
 
+		var createSQL string
+		rows.Scan(&tableName, &createSQL)
+		list = append(list, createSQL)
 	}
-	if err = rows.Err(); err != nil {
-		return nil, fmt.Errorf("遍历列名称失败: %v", err)
-	}
-
-	return columns, nil
+	return list, nil
 }
 
 // GetAIAnswer 获取回答

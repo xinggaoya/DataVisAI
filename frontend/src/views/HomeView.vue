@@ -60,18 +60,14 @@
       </el-card>
       <el-card style="flex: 2" shadow="never">
         <template v-slot:default style="height: 100%">
-          <div v-for="(item,index) in columnList" :key="index">
-            <div style="margin-bottom: 7px">
-              <el-text type="primary" tag="ins">{{ index }}</el-text>
-            </div>
+          <div v-for="(item,index) in columnList" :key="index" style="margin-bottom: 7px;">
             <el-scrollbar>
-              <el-space>
-                <el-tag type="info" v-for="(c,i) in item" :key="i">{{ c.Field }}</el-tag>
-              </el-space>
+              <el-tag type="primary" style="padding: 20px 10px">{{ item }}</el-tag>
             </el-scrollbar>
           </div>
           <el-divider/>
           <div style="height: 100%">
+            <h3>AI生成结果</h3>
             <el-scrollbar>
               <el-text class="language-text">{{ aiInfo }}</el-text>
             </el-scrollbar>
@@ -176,21 +172,7 @@ function clearCache() {
 
 // 生成结构问题
 function getQuestion() {
-  const info = columnList.value
-  const infoStr: any = {}
-  if (info) {
-    // 循环对象
-    Object.keys(info).forEach(item => {
-      let names = ''
-
-      info[item]?.forEach((item: any) => {
-        names += item.Field + ','
-      })
-
-      infoStr[item] = names
-    })
-  }
-  return JSON.stringify(infoStr)
+  return JSON.stringify(columnList.value)
 }
 
 // 获取数据表
@@ -208,21 +190,16 @@ function getAllTables() {
 }
 
 function getTableStructure() {
-  columnList.value = {}
-  if (form.table.length > 0) {
-    form.table.forEach(item => {
-      GetTableStructure(
-          form.address,
-          form.port,
-          form.account,
-          form.password,
-          form.database,
-          item
-      ).then(res => {
-        columnList.value[item] = res
-      })
-    })
-  }
+  GetTableStructure(
+      form.address,
+      form.port,
+      form.account,
+      form.password,
+      form.database,
+      form.table
+  ).then(res => {
+    columnList.value = res
+  })
 }
 
 // 测试
